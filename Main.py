@@ -201,9 +201,10 @@ def main():
 
     #Create Graphics Window and instructions
     win = GraphWin("Hand Therapy Analysis", 750, 650) #("name of window", pixel width, pixel height)
-    win.setBackground("ivory")
+    #win.setBackground("ivory")
     win.setCoords(0,0, 100, 100) #make the window 100 by 100 in order to more easily set size/location of objects
-    R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
+    myImage = Image(Point(20,20),"TestImageGIF.gif")
+    """R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
     R1.setFill("white")
     R1.draw(win)
     winR1 = Rectangle(Point(5,39), Point(45,5))
@@ -214,7 +215,7 @@ def main():
     R3.draw(win)
     Title = Text(Point(50, 95), "Hand Therapy Exercise")
     Title.draw(win)
-    print "true"
+    print "true"""""
     loop = True
     while loop == True: #repeat this loop for as long as the "end" statment is not read
         clickmaster = win.checkMouse() #check last click
