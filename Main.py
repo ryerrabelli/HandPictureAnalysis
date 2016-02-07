@@ -203,8 +203,9 @@ def main():
     win = GraphWin("Hand Therapy Analysis", 750, 650) #("name of window", pixel width, pixel height)
     #win.setBackground("ivory")
     win.setCoords(0,0, 100, 100) #make the window 100 by 100 in order to more easily set size/location of objects
-    myImage = Image(Point(20,20),"TestImageGIF.gif")
-    """R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
+    myImage = Image(Point(20,20),60,60, "TestImageGIF.gif")
+   # myImage.se
+    R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
     R1.setFill("white")
     R1.draw(win)
     winR1 = Rectangle(Point(5,39), Point(45,5))
@@ -215,17 +216,18 @@ def main():
     R3.draw(win)
     Title = Text(Point(50, 95), "Hand Therapy Exercise")
     Title.draw(win)
-    print "true"""""
+    print "true"
+    myImage.draw(win)
+
+    bQuit = Button(win, Point(50, 7), 6, 3, "Quit") #Quit button
+    bQuit.setFillGrey()
+
     loop = True
     while loop == True: #repeat this loop for as long as the "end" statment is not read
         clickmaster = win.checkMouse() #check last click
         if clickmaster != None and bQuit.clicked(clickmaster): #if Quit button is clicked: close the window and shut down the program
             casenum = -1 #tell other threads that they can close
-            ser.write(b'q') #send 'q' to the Arduino in order to turn off all the lights
             win.close()
-            ser.close()
-            if (useIMU):
-                serIMU.close()
             sys.exit()
 
 main()
