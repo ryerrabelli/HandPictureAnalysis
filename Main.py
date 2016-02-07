@@ -148,24 +148,44 @@ class Player:
         self.center = center
         self.rect = Rectangle(Point(10,45),Point(13,48))
         self.rect.setFill("green")
-        self.rect.draw(win)
+        #self.rect.draw(win)
+        self.image = Image(Point(10,50), "Decorational/hoppingsnowman.gif")#make center 10,46 if square
+        self.image.draw(win)
+        self.width = 3
+        self.height = 5
+
 
     def getCenter(self):
-        return self.rect.getCenter()
+#        return self.rect.get
+        return self.image.getAnchor()
+        #Center()
 
     def move(self, dx, dy):
-        self.rect.move(dx,dy)
+    #        self.rect.move(dx,dy)
+        self.image.move(dx,dy)
 
     def getP1(self):
-        return self.rect.getP1()
+        p = Point(self.getCenter().getX() + self.width, self.getCenter().getY() + self.height )
+        print "XY"
+        print str(p.getX())
+        print str(p.getY())
+        return p
+        #return self.rect.getP1()
 
     def getP2(self):
-        return self.rect.getP2()
+        #return self.rect.getP2()
+        p = Point(self.getCenter().getX() - self.width, self.getCenter().getY() - self.height )
+        print "XY"
+        print str(p.getX())
+        print str(p.getY())
+        return p
+        #return Point(self.getCenter().getX() - self.image.getWidth(), self.getCenter().getY() - self.image.getHeight() )
 
 
 class Enemy:
     def __init__(self, win, player):
         global  bEasyMode
+        global lives
         center = Point(20,80)
         rand = random.random()
         if rand < 0.5:
@@ -188,7 +208,11 @@ class Enemy:
         self.xCenter = center.getX()
         self.yCenter = center.getY()
         self.circle = Circle(center,1)
-        self.circle.setFill("white")
+        if lives > 1:
+            self.circle.setFill("white")
+        else:
+            self.circle.setFill("red")
+
         self.circle.draw(win)
 
         if bEasyMode.isChecked():
@@ -302,6 +326,9 @@ def convertToPBM(filePath, extension):
 def main():
     global loopNumber
     global bEasyMode
+    global lives
+    global shielded
+    global liveTitle
 
     print "true3"
     setPortResults = startScreen() #do this before the main loop to avoid needing to re-enter the port name every time the user decides to play again
@@ -324,6 +351,10 @@ def main():
     R3 = Rectangle(Point(55,39), Point(95,5)) #Right one
     R3.setFill("lavender")
     R3.draw(win)
+
+    liveTitle = Text(Point(50,36), "Lives: 3")
+    liveTitle.draw(win)
+
     Title = Text(Point(50, 95), "Hand Therapy Exercises")
     Title.draw(win)
     Title2 = Text(Point(25, 36), "Exercise:")
@@ -340,14 +371,13 @@ def main():
     enemies = []
     enemies.append( Enemy(win, player) )
 
-    if not bEasyMode.isChecked():
-        epoch = time.time()
+    epoch = time.time()
     loop = True
     while loop == True: #repeat this loop for as long as the "end" statment is not read
         clickmaster = win.checkMouse() #check last click
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
-        elevatePlayer(player,0.005)
+        movePlayer(player,0.005)
         for anEnemy in enemies:
             anEnemy.travel(0.005)
 
@@ -360,8 +390,13 @@ def main():
             sys.exit()
         enemies = [anEnemy for anEnemy in enemies if anEnemy.isAlive()]
         for anEnemy in enemies:
-            if haveCollided(player,anEnemy):
-                sys.exit(0)
+            if time.time() > shielded and haveCollided(player,anEnemy):
+                print "collided"
+                lives -= 1
+                shielded = time.time()+3 #second invicibility
+
+                if lives < 1:
+                    exitProgram(win)
         if bEasyMode.isChecked() or time.time() < epoch + 10.0:
             if len(enemies) < 1:
                 enemies.append( Enemy(win, player) )
@@ -406,6 +441,9 @@ def elevatePlayer(player, displ):
     else:
         player.move(0,displ)
 
+shielded = 0
+lives = 3
+liveTitle = -1 #should be the textbox
 bEasyMode = 0
 #convertToPBM("65", ".txt")
 main()
