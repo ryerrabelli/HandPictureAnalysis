@@ -1,5 +1,6 @@
 import cv2
-from whichcluster import whichcluster
+from whichcluster3 import convertsmall
+from whichcluster2 import whichcluster
 import numpy as np                       #importing libraries
 
 
@@ -30,7 +31,8 @@ while( cap.isOpened() ) :
     cv2.imshow('OTSU',thresh1)                  #displaying the frames'''
     ret,thresh2 = cv2.threshold(blur,70,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     thresh1 = thresh2[thresh2.shape[0]/3:thresh2.shape[0],thresh2.shape[0]/8:thresh2.shape[1]/8*7]
-    result = whichcluster(thresh1)
+    cv2.imwrite("input.jpg",thresh1)    
+    result =convertsmall("input.jpg")
     if (result == 1):
         print "1"
     if (result == 2) :
