@@ -32,7 +32,11 @@ while( cap.isOpened() ) :
     ret,thresh2 = cv2.threshold(blur,70,255,cv2.THRESH_BINARY_INV+cv2.THRESH_OTSU)
     thresh1 = thresh2[thresh2.shape[0]/3:thresh2.shape[0],thresh2.shape[0]/8:thresh2.shape[1]/8*7]
     cv2.imwrite("input.jpg",thresh1)    
-    result =convertsmall("input.jpg")
+    array =convertsmall("input.jpg")
+    list1=[]
+    for i in range(array.shape[0]):
+        list1.extend(array[i])
+    result=whichcluster(list1)
     if (result == 1):
         print "1"
     if (result == 2) :
