@@ -7,6 +7,8 @@ import cv2
 import random
 from math import *
 import time
+import thread
+from test import *
 
 #Button class with pre-determined functions
 class Button:
@@ -371,6 +373,8 @@ def main():
     enemies = []
     enemies.append( Enemy(win, player) )
 
+    thread.start_new_thread(gitMotion, ())
+
     epoch = time.time()
     loop = True
     while loop == True: #repeat this loop for as long as the "end" statment is not read
@@ -380,6 +384,9 @@ def main():
         movePlayer(player,0.005)
         for anEnemy in enemies:
             anEnemy.travel(0.005)
+
+        print "motion"
+        print motion
 
         #player.move(0.01,0)
         if clickmaster != None:
