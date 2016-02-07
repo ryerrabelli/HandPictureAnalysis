@@ -3,6 +3,9 @@
 #February 5th, 2016 - February 7th, 2016
 
 from graphics import * #used for GUI
+import cv2
+import random
+from math import *
 
 #Button class with pre-determined functions
 class Button:
@@ -138,6 +141,67 @@ class CheckBox:
     def setOriginalFill(self):
         self.rect.setFill('Bisque')
 
+class Enemy:
+    def __init__(self, win):
+        center = Point(20,80)
+        rand = random.random()
+        if rand < 0.5:
+            #vertical
+            y=100
+            x=random.random()*100
+        elif rand <0.75:
+            #left, height 45 to 100
+            x=0
+            y = ceil(random.random()*55)
+
+        else:
+            #right, height 45 to 100
+            x=100
+            y = 48+ ceil(random.random()*55)
+
+        center = Point(x,y)
+
+
+        self.xCenter = center.getX()
+        self.yCenter = center.getY()
+        self.circle = Circle(center,1)
+        self.circle.setFill("white")
+        self.circle.draw(win)
+
+        hyp = 5.0
+        yVel = random.random()* hyp
+        xVel = sqrt(pow(hyp,2)-pow(yVel,2))
+
+        x0 = (random.random()-0.5)*20+50 #50
+        y0 = 46
+        yVel = hyp/sqrt(1+pow( (x-x0)/(fabs(y-y0)+0.001),2))
+        xVel = hyp/sqrt(1+pow( (y-y0)/(fabs(x-x0)+0.001),2))
+
+        if x < 50:
+            xVel = abs(xVel)
+        else:
+            xVel = -1*abs(xVel)
+        yVel = -1*abs(yVel)
+        self.xVel = xVel
+        self.yVel =  yVel
+        self.alive = True
+
+    def travel(self, timeDif):
+        if self.alive == False:
+            print "Error. Enemy is already dead"
+        self.circle.move(self.xVel*timeDif,self.yVel*timeDif)
+        if self.circle.getCenter().getX() <= 0.0 or self.circle.getCenter().getX() >= 100.0 or self.circle.getCenter().getY() >= 100.0:
+            self.alive = False
+            self.circle.undraw()
+        elif self.circle.getCenter().getY() <= 0.0:
+            self.alive = False
+        #self.alive = False
+
+
+    def isAlive(self):
+        return self.alive
+
+
 
 #input a GraphWin object
 def getMouse(window):
@@ -204,6 +268,8 @@ def convertToPBM(filePath, extension):
 
 
 def main():
+    global loopNumber
+
     print "true3"
     setPortResults = startScreen() #do this before the main loop to avoid needing to re-enter the port name every time the user decides to play again
 
@@ -216,8 +282,9 @@ def main():
     myImage.draw(win)
 
     R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
-    R1.setFill("white")
+    R1.setFill("black")
     R1.draw(win)
+
     winR1 = Rectangle(Point(5,39), Point(45,5)) #Left one
     winR1.setFill("lavender")
     winR1.draw(win)
@@ -232,16 +299,76 @@ def main():
     Title3.draw(win)
     print "true"
 
+    player = Rectangle(Point(10,45),Point(13,48))
+    player.setFill("green")
+    player.draw(win)
+
     bQuit = Button(win, Point(50, 7), 6, 3, "Quit") #Quit button
     bQuit.setFillGrey()
+
+    enemies = []
+    enemies.append( Enemy(win) )
 
     loop = True
     while loop == True: #repeat this loop for as long as the "end" statment is not read
         clickmaster = win.checkMouse() #check last click
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+        elevatePlayer(player,0.005)
+        for anEnemy in enemies:
+            anEnemy.travel(0.005)
+
+        #player.move(0.01,0)
+        if clickmaster != None:
+            player.move(5,0)
         if clickmaster != None and bQuit.clicked(clickmaster): #if Quit button is clicked: close the window and shut down the program
             casenum = -1 #tell other threads that they can close
             win.close()
             sys.exit()
+        enemies = [anEnemy for anEnemy in enemies if anEnemy.isAlive()]
+        for anEnemy in enemies:
+            if haveCollided(player,anEnemy):
+                sys.exit(0)
+        if len(enemies) < 2:
+            enemies.append( Enemy(win) )
+
+loopNumber = 0
+
+def haveCollided(player, anEnemy):
+    enCen = anEnemy.circle.getCenter()
+    enRad = anEnemy.circle.getRadius()
+    plaCen = player.getCenter()
+    plW = fabs(player.getP1().getX()-player.getP2().getX())
+    plH = fabs(player.getP1().getY()-player.getP2().getY())
+    heightWithin = False
+    widthWithin = False
+    if (enCen.getY() >= plaCen.getY() and enCen.getY() - enRad < plaCen.getY() + 0.5*plH): #enemy on top
+        heightWithin = True
+    elif enCen.getY() <= plaCen.getY() and enCen.getY() + enRad > plaCen.getY() - 0.5*plH: #player on top
+        heightWithin = True
+
+    if (enCen.getX() >= plaCen.getX() and enCen.getX() - enRad < plaCen.getX() + 0.5*plW): #enemy on right
+        widthWithin = True
+    elif enCen.getX() <= plaCen.getX() and enCen.getX() + enRad > plaCen.getX() - 0.5*plW: #player on right
+        widthWithin = True
+
+    return widthWithin and heightWithin #returns boolean. Doesn't take into account the diagonals
+
+
+def movePlayer(player, displ):
+    if player.getCenter().getX()+displ < 5:
+        player.move(95-player.getCenter().getX(), 0)
+    elif player.getCenter().getX()+displ > 95:
+        player.move(player.getCenter().getX() -185, 0)
+    else:
+        player.move(displ,0)
+def elevatePlayer(player, displ):
+    if player.getCenter().getY()+displ < 48:
+        player.move(0,95-player.getCenter().getY())
+    elif player.getCenter().getY()+displ > 95:
+        player.move(0,player.getCenter().getY() -142)
+    else:
+        player.move(0,displ)
 
 #convertToPBM("65", ".txt")
 main()
