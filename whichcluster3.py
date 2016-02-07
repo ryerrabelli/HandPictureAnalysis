@@ -2,9 +2,8 @@ from PIL import Image
 import glob, os
 import numpy as np
 
-size = 40,40
-for infile in glob.glob("*.jpg"):
-    file, ext = os.path.splitext(infile)
+def convertsmall(infile):
+    size = 40,40
     im = Image.open(infile)
     im.thumbnail(size)
     pixels = np.asarray(im)
@@ -15,7 +14,8 @@ for infile in glob.glob("*.jpg"):
                 pixels1[i][j]=0
             else:
                 pixels1[i][j]=1
-    pixels1.tofile('{}'.format(infile+'.csv'),sep=',',format='%s') 
+    return pixels1
+
 
 
 
