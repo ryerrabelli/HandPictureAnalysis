@@ -195,6 +195,14 @@ def startScreen(): #This function allows the user to input the port name of the 
             bUseIMU.toggle()
     return ( port_name, bUseIMU.isChecked() )
 
+def convertToPBM(filePath, extension):
+    origFile = open(filePath+extension,'r')
+    PBMFile = open(filePath+".pbm",'w+')
+    PBMFile.write("P1\n6 10\n")
+    for line in origFile:
+        PBMFile.write(line.replace(","," "))
+
+
 def main():
     print "true3"
     setPortResults = startScreen() #do this before the main loop to avoid needing to re-enter the port name every time the user decides to play again
@@ -203,21 +211,25 @@ def main():
     win = GraphWin("Hand Therapy Analysis", 750, 650) #("name of window", pixel width, pixel height)
     #win.setBackground("ivory")
     win.setCoords(0,0, 100, 100) #make the window 100 by 100 in order to more easily set size/location of objects
-    myImage = Image(Point(20,20), "TestImageGIF.gif")
+    myImage = Image(Point(20,40), "MARBLES.PPM")
    # myImage.se
     myImage.draw(win)
 
     R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
     R1.setFill("white")
     R1.draw(win)
-    winR1 = Rectangle(Point(5,39), Point(45,5))
+    winR1 = Rectangle(Point(5,39), Point(45,5)) #Left one
     winR1.setFill("lavender")
     winR1.draw(win)
-    R3 = Rectangle(Point(55,39), Point(95,5))
+    R3 = Rectangle(Point(55,39), Point(95,5)) #Right one
     R3.setFill("lavender")
     R3.draw(win)
-    Title = Text(Point(50, 95), "Hand Therapy Exercise")
+    Title = Text(Point(50, 95), "Hand Therapy Exercises")
     Title.draw(win)
+    Title2 = Text(Point(25, 36), "Exercise:")
+    Title2.draw(win)
+    Title3 = Text(Point(75, 36), "Exercise:")
+    Title3.draw(win)
     print "true"
 
     bQuit = Button(win, Point(50, 7), 6, 3, "Quit") #Quit button
@@ -231,5 +243,6 @@ def main():
             win.close()
             sys.exit()
 
+#convertToPBM("65", ".txt")
 main()
 print "true2"
