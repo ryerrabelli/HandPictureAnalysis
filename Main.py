@@ -6,6 +6,7 @@ from graphics import * #used for GUI
 import cv2
 import random
 from math import *
+import time
 
 #Button class with pre-determined functions
 class Button:
@@ -141,8 +142,30 @@ class CheckBox:
     def setOriginalFill(self):
         self.rect.setFill('Bisque')
 
+class Player:
+    def __init__(self, win, center):
+        i = 2
+        self.center = center
+        self.rect = Rectangle(Point(10,45),Point(13,48))
+        self.rect.setFill("green")
+        self.rect.draw(win)
+
+    def getCenter(self):
+        return self.rect.getCenter()
+
+    def move(self, dx, dy):
+        self.rect.move(dx,dy)
+
+    def getP1(self):
+        return self.rect.getP1()
+
+    def getP2(self):
+        return self.rect.getP2()
+
+
 class Enemy:
-    def __init__(self, win):
+    def __init__(self, win, player):
+        global  bEasyMode
         center = Point(20,80)
         rand = random.random()
         if rand < 0.5:
@@ -168,14 +191,21 @@ class Enemy:
         self.circle.setFill("white")
         self.circle.draw(win)
 
-        hyp = 5.0
-        yVel = random.random()* hyp
-        xVel = sqrt(pow(hyp,2)-pow(yVel,2))
+        if bEasyMode.isChecked():
+            hyp = 5.0
+            #yVel = random.random()* hyp
+            #xVel = sqrt(pow(hyp,2)-pow(yVel,2))
+            x0 = (random.random()-0.5)*20+50 #50
+            y0 = 46
+            yVel = hyp/sqrt(1+pow( (x-x0)/(fabs(y-y0)+0.001),2))
+            xVel = hyp/sqrt(1+pow( (y-y0)/(fabs(x-x0)+0.001),2))
+        else:
+            hyp = 5.0
+            x0 = player.getCenter().getX()
+            y0 = player.getCenter().getY()
+            yVel = hyp/sqrt(1+pow( (x-x0)/(fabs(y-y0)+0.001),2))
+            xVel = hyp/sqrt(1+pow( (y-y0)/(fabs(x-x0)+0.001),2))
 
-        x0 = (random.random()-0.5)*20+50 #50
-        y0 = 46
-        yVel = hyp/sqrt(1+pow( (x-x0)/(fabs(y-y0)+0.001),2))
-        xVel = hyp/sqrt(1+pow( (y-y0)/(fabs(x-x0)+0.001),2))
 
         if x < 50:
             xVel = abs(xVel)
@@ -216,6 +246,7 @@ def exitProgram(window):
 
 def startScreen(): #This function allows the user to input the port name of the serial connection to the Arduino board
     #The function returns the port name which is needed later in this code to create the serial connection to the Arduino Board in order to send instructions to the Arduino board and receive results
+    global  bEasyMode
     win = GraphWin("Hand Analysis", 325, 200) #("name of window", pixel width, pixel height)
     win.setBackground("light blue")
     win.setCoords(0,0, 100, 100) #make the window 100 by 100 in order to more easily set size/location of objects
@@ -223,10 +254,11 @@ def startScreen(): #This function allows the user to input the port name of the 
     Title.draw(win)
 
     input_name = Entry(Point(50,50), 20) #create an entry box where the user can input characters
+    input_name = Entry(Point(50,50), 20) #create an entry box where the user can input characters
     input_name.setText("") #Rahul Y, For testing purposes
     input_name.draw(win)
 
-    bUseIMU = CheckBox(win,Point(34, 27), 29, 10, "Save Name",False) #toggle
+    bEasyMode = CheckBox(win,Point(34, 27), 29, 10, "Easy",False) #toggle
     bHelp = Button(win, Point(66, 27), 29,10, "Help") #button the user should press in order to pull up instructions about how to install port settings
     binstall = Button(win, Point(50, 10), 25,12, "Start") #button the user should press after writing port name
 
@@ -255,9 +287,9 @@ def startScreen(): #This function allows the user to input the port name of the 
                 helpWin.setCoords(0,0, 100, 100) #make the window 100 by 100 in order to more easily set size/location of objects
                 helpText = Text(Point(50, 50), "Please find and open the\nWord Document called\n\"Install_help.docx\" ")
                 helpText.draw(helpWin)
-        elif bUseIMU.clicked(p_clickin):
-            bUseIMU.toggle()
-    return ( port_name, bUseIMU.isChecked() )
+        elif bEasyMode.clicked(p_clickin):
+            bEasyMode.toggle()
+    return ( port_name, bEasyMode.isChecked() )
 
 def convertToPBM(filePath, extension):
     origFile = open(filePath+extension,'r')
@@ -269,6 +301,7 @@ def convertToPBM(filePath, extension):
 
 def main():
     global loopNumber
+    global bEasyMode
 
     print "true3"
     setPortResults = startScreen() #do this before the main loop to avoid needing to re-enter the port name every time the user decides to play again
@@ -299,16 +332,16 @@ def main():
     Title3.draw(win)
     print "true"
 
-    player = Rectangle(Point(10,45),Point(13,48))
-    player.setFill("green")
-    player.draw(win)
+    player = Player(win, Point(10,45))
 
     bQuit = Button(win, Point(50, 7), 6, 3, "Quit") #Quit button
     bQuit.setFillGrey()
 
     enemies = []
-    enemies.append( Enemy(win) )
+    enemies.append( Enemy(win, player) )
 
+    if not bEasyMode.isChecked():
+        epoch = time.time()
     loop = True
     while loop == True: #repeat this loop for as long as the "end" statment is not read
         clickmaster = win.checkMouse() #check last click
@@ -329,8 +362,11 @@ def main():
         for anEnemy in enemies:
             if haveCollided(player,anEnemy):
                 sys.exit(0)
-        if len(enemies) < 2:
-            enemies.append( Enemy(win) )
+        if bEasyMode.isChecked() or time.time() < epoch + 10.0:
+            if len(enemies) < 1:
+                enemies.append( Enemy(win, player) )
+        elif len(enemies) < 2:
+            enemies.append( Enemy(win, player) )
 
 loopNumber = 0
 
@@ -370,6 +406,7 @@ def elevatePlayer(player, displ):
     else:
         player.move(0,displ)
 
+bEasyMode = 0
 #convertToPBM("65", ".txt")
 main()
 print "true2"
