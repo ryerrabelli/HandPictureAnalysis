@@ -1,5 +1,5 @@
 #################
-PCA decomposition
+#PCA decomposition
 #################
 
 from scipy.spatial.distance import euclidean
