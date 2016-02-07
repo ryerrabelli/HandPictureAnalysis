@@ -388,6 +388,20 @@ def main():
         print "motion"
         print motion
 
+        if motion == 0:
+            pass
+        elif motion == 1:
+            movePlayer(player,-0.005)
+        elif motion == 2:
+            pass
+        elif motion == 3:
+            pass
+        elif motion == 4:
+            movePlayer(player,0.005)
+        elif motion == 5:
+            pass
+        elif motion == 6:
+            movePlayer(player,0.005)
         #player.move(0.01,0)
         if clickmaster != None:
             player.move(5,0)
