@@ -203,8 +203,10 @@ def main():
     win = GraphWin("Hand Therapy Analysis", 750, 650) #("name of window", pixel width, pixel height)
     #win.setBackground("ivory")
     win.setCoords(0,0, 100, 100) #make the window 100 by 100 in order to more easily set size/location of objects
-    myImage = Image(Point(20,20),60,60, "TestImageGIF.gif")
+    myImage = Image(Point(20,20), "TestImageGIF.gif")
    # myImage.se
+    myImage.draw(win)
+
     R1 = Rectangle(Point(5,98), Point(95, 43)) #Outline that helps break up the graphic window
     R1.setFill("white")
     R1.draw(win)
@@ -217,7 +219,6 @@ def main():
     Title = Text(Point(50, 95), "Hand Therapy Exercise")
     Title.draw(win)
     print "true"
-    myImage.draw(win)
 
     bQuit = Button(win, Point(50, 7), 6, 3, "Quit") #Quit button
     bQuit.setFillGrey()
